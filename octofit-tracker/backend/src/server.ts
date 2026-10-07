@@ -28,16 +28,8 @@ app.get('/api/health', (_request, response) => {
   });
 });
 
-const resourceHandlers: Array<[string, any]> = [
-  ['users', User],
-  ['teams', Team],
-  ['activities', Activity],
-  ['leaderboard', Leaderboard],
-  ['workouts', Workout],
-];
-
-for (const [resource, model] of resourceHandlers) {
-  app.get(`/api/${resource}/`, async (_request, response) => {
+function createResourceHandler(resource: string, model: any) {
+  return async (_request: express.Request, response: express.Response) => {
     try {
       const records = await model.find({}).lean();
       response.json(records);
@@ -47,14 +39,26 @@ for (const [resource, model] of resourceHandlers) {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  });
+  };
 }
+
+app.get('/api/users/', createResourceHandler('users', User));
+app.get('/api/teams/', createResourceHandler('teams', Team));
+app.get('/api/activities/', createResourceHandler('activities', Activity));
+app.get('/api/leaderboard/', createResourceHandler('leaderboard', Leaderboard));
+app.get('/api/workouts/', createResourceHandler('workouts', Workout));
 
 app.get('/', (_request, response) => {
   response.json({
     app: 'Octofit Tracker',
     apiBase: baseUrl,
-    resources: resourceHandlers.map(([resource]) => `/api/${resource}/`),
+    resources: [
+      '/api/users/',
+      '/api/teams/',
+      '/api/activities/',
+      '/api/leaderboard/',
+      '/api/workouts/',
+    ],
   });
 });
 
