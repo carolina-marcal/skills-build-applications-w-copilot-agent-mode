@@ -143,7 +143,8 @@ export const checks = {
     for (const resource of resources) {
       const { file, text } = resourceComponent(root, resource);
       assertValid(
-        new RegExp(`/api/${resource}/?`, 'i').test(text) && /\b(?:fetch|axios)\b/i.test(text),
+        new RegExp(`/api/${resource}/?`, 'i').test(text) &&
+          /\b(?:fetch|axios|fetchCollection)\b/i.test(text),
         `${file} must request /api/${resource}/`,
       );
       const componentName = path.basename(file, path.extname(file));
