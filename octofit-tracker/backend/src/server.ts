@@ -28,8 +28,9 @@ app.get('/api/health', (_request, response) => {
   });
 });
 
-function createResourceHandler(resource: string, model: any) {
-  return async (_request: express.Request, response: express.Response) => {
+function createResourceRouter(resource: string, model: any) {
+  const router = express.Router();
+  router.get('/', async (_request: express.Request, response: express.Response) => {
     try {
       const records = await model.find({}).lean();
       response.json(records);
@@ -39,14 +40,15 @@ function createResourceHandler(resource: string, model: any) {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  };
+  });
+  return router;
 }
 
-app.get('/api/users/', createResourceHandler('users', User));
-app.get('/api/teams/', createResourceHandler('teams', Team));
-app.get('/api/activities/', createResourceHandler('activities', Activity));
-app.get('/api/leaderboard/', createResourceHandler('leaderboard', Leaderboard));
-app.get('/api/workouts/', createResourceHandler('workouts', Workout));
+app.use('/api/users/', createResourceRouter('users', User));
+app.use('/api/teams/', createResourceRouter('teams', Team));
+app.use('/api/activities/', createResourceRouter('activities', Activity));
+app.use('/api/leaderboard/', createResourceRouter('leaderboard', Leaderboard));
+app.use('/api/workouts/', createResourceRouter('workouts', Workout));
 
 app.get('/', (_request, response) => {
   response.json({
