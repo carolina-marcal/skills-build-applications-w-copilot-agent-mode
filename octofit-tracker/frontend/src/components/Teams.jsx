@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
-import apiBase from '../api.js';
+import { fetchCollection } from '../api.js';
 
 export default function Teams() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`${apiBase}/api/teams/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setTeams(Array.isArray(data) ? data : data.results ?? []);
-        setLoading(false);
+    const controller = new AbortController();
+    fetchCollection('/api/teams/', controller.signal)
+      .then(setTeams)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError.message);
       })
-      .catch(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
     <section>
       <h1>Teams</h1>
-      {loading ? <p>Loading teams...</p> : null}
+      {loading ? <p role="status">Loading teams...</p> : null}
+      {error ? <p className="alert alert-danger" role="alert">{error}</p> : null}
+      {!loading && !error && teams.length === 0 ? <p>No teams found.</p> : null}
       <div className="row g-3">
         {teams.map((team) => (
           <div key={team._id ?? team.name} className="col-md-6">

@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
-import apiBase from '../api.js';
+import { fetchCollection } from '../api.js';
 
 export default function Workouts() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`${apiBase}/api/workouts/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setWorkouts(Array.isArray(data) ? data : data.results ?? []);
-        setLoading(false);
+    const controller = new AbortController();
+    fetchCollection('/api/workouts/', controller.signal)
+      .then(setWorkouts)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError.message);
       })
-      .catch(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
     <section>
       <h1>Workouts</h1>
-      {loading ? <p>Loading workouts...</p> : null}
+      {loading ? <p role="status">Loading workouts...</p> : null}
+      {error ? <p className="alert alert-danger" role="alert">{error}</p> : null}
+      {!loading && !error && workouts.length === 0 ? <p>No workouts found.</p> : null}
       <div className="row g-3">
         {workouts.map((workout) => (
           <div key={workout._id ?? workout.name} className="col-md-6">

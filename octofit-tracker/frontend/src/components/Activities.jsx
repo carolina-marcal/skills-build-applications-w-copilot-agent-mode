@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
-import apiBase from '../api.js';
+import { fetchCollection } from '../api.js';
 
 export default function Activities() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`${apiBase}/api/activities/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setActivities(Array.isArray(data) ? data : data.results ?? []);
-        setLoading(false);
+    const controller = new AbortController();
+    fetchCollection('/api/activities/', controller.signal)
+      .then(setActivities)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError.message);
       })
-      .catch(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
     <section>
       <h1>Activities</h1>
-      {loading ? <p>Loading activities...</p> : null}
+      {loading ? <p role="status">Loading activities...</p> : null}
+      {error ? <p className="alert alert-danger" role="alert">{error}</p> : null}
+      {!loading && !error && activities.length === 0 ? <p>No activities found.</p> : null}
       <div className="row g-3">
         {activities.map((activity) => (
           <div key={activity._id ?? activity.name} className="col-md-6">

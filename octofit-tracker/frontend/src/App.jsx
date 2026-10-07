@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import Activities from './components/Activities.jsx';
 import Leaderboard from './components/Leaderboard.jsx';
 import Teams from './components/Teams.jsx';
@@ -11,25 +11,26 @@ function App() {
     <div className="app-shell">
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container">
-          <span className="navbar-brand">Octofit Tracker</span>
+          <NavLink className="navbar-brand" to="/">Octofit Tracker</NavLink>
           <div className="navbar-nav me-auto">
-            <NavLink className="nav-link" to="/users">Users</NavLink>
-            <NavLink className="nav-link" to="/teams">Teams</NavLink>
-            <NavLink className="nav-link" to="/activities">Activities</NavLink>
-            <NavLink className="nav-link" to="/leaderboard">Leaderboard</NavLink>
-            <NavLink className="nav-link" to="/workouts">Workouts</NavLink>
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/users">Users</NavLink>
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/teams">Teams</NavLink>
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/activities">Activities</NavLink>
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/leaderboard">Leaderboard</NavLink>
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/workouts">Workouts</NavLink>
           </div>
         </div>
       </nav>
 
       <main className="container py-4">
         <Routes>
+          <Route path="/" element={<Navigate to="/users" replace />} />
           <Route path="/users" element={<Users />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/workouts" element={<Workouts />} />
-          <Route path="*" element={<Users />} />
+          <Route path="*" element={<Navigate to="/users" replace />} />
         </Routes>
       </main>
     </div>

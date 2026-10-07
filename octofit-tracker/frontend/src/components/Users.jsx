@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
-import apiBase from '../api.js';
+import { fetchCollection } from '../api.js';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`${apiBase}/api/users/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(Array.isArray(data) ? data : data.results ?? []);
-        setLoading(false);
+    const controller = new AbortController();
+    fetchCollection('/api/users/', controller.signal)
+      .then(setUsers)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError.message);
       })
-      .catch(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
     <section>
       <h1>Users</h1>
-      {loading ? <p>Loading users...</p> : null}
+      {loading ? <p role="status">Loading users...</p> : null}
+      {error ? <p className="alert alert-danger" role="alert">{error}</p> : null}
+      {!loading && !error && users.length === 0 ? <p>No users found.</p> : null}
       <div className="row g-3">
         {users.map((user) => (
           <div key={user._id ?? user.username ?? user.name} className="col-md-6">
