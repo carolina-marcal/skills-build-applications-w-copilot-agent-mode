@@ -18,4 +18,5 @@ Requirements:
    - `/api/leaderboard/`
    - `/api/workouts/`
 5. Keep server port on `8000`.
+
 6. Add Codespaces-aware API URL support using `CODESPACE_NAME`.
