@@ -1,11 +1,11 @@
 import cors from 'cors';
 import express from 'express';
 import { connectDatabase } from './config/database.js';
-import Activity from './models/Activity.js';
-import Leaderboard from './models/Leaderboard.js';
-import Team from './models/Team.js';
-import User from './models/User.js';
-import Workout from './models/Workout.js';
+import Activity from './models/activity.js';
+import Leaderboard from './models/leaderboard.js';
+import Team from './models/team.js';
+import User from './models/user.js';
+import Workout from './models/workout.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 8000);
